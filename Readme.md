@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Саша Кандауров](https://up.htmlacademy.ru/ecmascript-individual/2/user/2446367).
-* Наставник: `Неизвестно`.
+* Наставник: [Олег Глущенко](https://up.htmlacademy.ru/javascript-individual/2/user/305355).
 
 ---
 
