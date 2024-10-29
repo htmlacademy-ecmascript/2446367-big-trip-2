@@ -1,15 +1,22 @@
-import { render, RenderPosition } from './render.js';
-import TripInfoView from './view/trip-info-view.js';
-import ListFilterView from './view/list-filter-view.js';
+import HeaderPresenter from './presenter/header-presenter.js';
 import BoardPresenter from './presenter/board-presenter.js';
+import waypointsModel from './model/waypoints-model.js';
 
 const tripInfoContainer = document.querySelector('.trip-main');
 const filtersContainer = document.querySelector('.trip-controls__filters');
 const tripEventsElement = document.querySelector('.trip-events');
 
-render (new TripInfoView(), tripInfoContainer, RenderPosition.AFTERBEGIN);
-render (new ListFilterView(), filtersContainer);
+const waypointModel = new waypointsModel();
 
-const boardPresenter = new BoardPresenter({boardContainer: tripEventsElement});
+const headerPresenter = new HeaderPresenter({
+  headerContainer:  tripInfoContainer,
+  listFiltersContainer: filtersContainer
+});
 
+const boardPresenter = new BoardPresenter({
+  boardContainer: tripEventsElement,
+  waypointModel
+});
+
+headerPresenter.init();
 boardPresenter.init();

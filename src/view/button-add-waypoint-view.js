@@ -1,15 +1,14 @@
 import { createElement } from '../render.js';
 
-function createListTemplate () {
+function createButtonAddWaypointTemplate () {
   return (`
-    <ul class="trip-events__list">
-    </ul>
+      <button class="trip-main__event-add-btn  btn  btn--big  btn--yellow" type="button">New event</button>
   `);
 }
 
-export default class ListView {
+export default class ButtonAddWaypointView {
   getTemplate() {
-    return createListTemplate;
+    return createButtonAddWaypointTemplate;
   }
 
   getElement() {
