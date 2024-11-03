@@ -3,6 +3,7 @@ import WaypointItemView from '../view/waypoint-item-view.js';
 import WaypointEditView from '../view/waypoint-edit-view.js';
 import ListSortView from '../view/list-sort-view.js';
 import { render, replace } from '../framework/render.js';
+import NoWaypointView from '../view/no-waypoint-view.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
@@ -77,6 +78,11 @@ export default class BoardPresenter {
 
   #renderBoard() {
     render(this.#listSortView, this.#boardContainer);
+
+    if (this.#boardWaypoints.length === 0) {
+      render(new NoWaypointView, this.#boardContainer);
+      return;
+    }
 
     render(this.#listContainer, this.#boardContainer);
 
