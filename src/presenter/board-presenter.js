@@ -1,40 +1,97 @@
-import { render } from '../render.js';
 import WaypointListView from '../view/waypoint-list-view.js';
 import WaypointItemView from '../view/waypoint-item-view.js';
+import WaypointEditView from '../view/waypoint-edit-view.js';
 import ListSortView from '../view/list-sort-view.js';
-import WaypointEdit from '../view/waypoint-edit-view.js';
+import { render, replace } from '../framework/render.js';
+import NoWaypointView from '../view/no-waypoint-view.js';
 
 export default class BoardPresenter {
-  listContainer = new WaypointListView();
-  listSortView = new ListSortView();
+  #boardContainer = null;
+  #waypointModel = null;
+
+  #listContainer = new WaypointListView();
+  #listSortView = new ListSortView();
+
+  #boardWaypoints = [];
+  #boardOffers = [];
+  #boardDestinations = [];
 
   constructor({ boardContainer, waypointModel }) {
-    this.boardContainer = boardContainer;
-    this.waypointModel = waypointModel;
+    this.#boardContainer = boardContainer;
+    this.#waypointModel = waypointModel;
   }
 
   init() {
-    const waypoints = this.waypointModel.getWaypoints();
-    const offers = this.waypointModel.getOffers();
-    const destinations = this.waypointModel.getDestinations();
+    this.#boardWaypoints = [...this.#waypointModel.waypoints];
+    this.#boardOffers = [...this.#waypointModel.offers];
+    this.#boardDestinations = [...this.#waypointModel.destinations];
 
-    this.boardWaypoints = [...waypoints];
+    this.#renderBoard();
+  }
 
-    render(this.listSortView, this.boardContainer);
+  #renderWaypointItem({waypoints, offers, destinations}) {
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
 
-    render(this.listContainer, this.boardContainer);
-    render(new WaypointEdit({
-      waypoints: this.boardWaypoints[0],
-      offers: offers,
-      destinations: destinations,
-    }), this.listContainer.getElement());
+    const waypointItemComponent = new WaypointItemView({
+      waypoints,
+      offers,
+      destinations,
 
-    for (let i = 1; i < this.boardWaypoints.length; i++) {
-      render (new WaypointItemView({
-        waypoints: this.boardWaypoints[i],
-        offers: offers,
-        destinations: destinations,
-      }), this.listContainer.getElement());
+      onEditClick: () => {
+        replaceCardToForm();
+        document.addEventListener('keydown', escKeyDownHandler);
+      },
+    });
+
+    const waypointEditComponent = new WaypointEditView({
+      waypoints,
+      offers,
+      destinations,
+
+      onFormSubmit: () => {
+        replaceFormToCard();
+        document.addEventListener('keydown', escKeyDownHandler);
+      },
+
+      onCloseEditClick: () => {
+        replaceFormToCard();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    });
+
+    function replaceCardToForm() {
+      replace(waypointEditComponent, waypointItemComponent);
+    }
+
+    function replaceFormToCard() {
+      replace(waypointItemComponent, waypointEditComponent);
+    }
+
+    render(waypointItemComponent, this.#listContainer.element);
+  }
+
+  #renderBoard() {
+    render(this.#listSortView, this.#boardContainer);
+
+    if (this.#boardWaypoints.length === 0) {
+      render(new NoWaypointView, this.#boardContainer);
+      return;
+    }
+
+    render(this.#listContainer, this.#boardContainer);
+
+    for (let i = 0; i < this.#boardWaypoints.length; i++) {
+      this.#renderWaypointItem({
+        waypoints: this.#boardWaypoints[i],
+        offers: this.#boardOffers,
+        destinations: this.#boardDestinations,
+      });
     }
   }
 }

@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createButtonAddWaypointTemplate () {
   return (`
@@ -6,20 +6,8 @@ function createButtonAddWaypointTemplate () {
   `);
 }
 
-export default class ButtonAddWaypointView {
-  getTemplate() {
+export default class ButtonAddWaypointView extends AbstractView {
+  get template() {
     return createButtonAddWaypointTemplate;
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }

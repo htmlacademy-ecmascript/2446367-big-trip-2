@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { WAYPOINT_TYPE } from '../data.js';
 import { getElementById, getElementByType, capitalizeFirstLetter } from '../utils.js';
 
@@ -149,26 +149,39 @@ function createWaypointEditTemplate (waypoints, offers, destinations) {
   `);
 }
 
-export default class WaypointEdit {
-  constructor({ waypoints, offers, destinations }) {
-    this.waypoints = waypoints;
-    this.offers = offers;
-    this.destinations = destinations;
+export default class WaypointEditView extends AbstractView {
+  #waypoints = null;
+  #offers = null;
+  #destinations = null;
+
+  #handleFormSubmit = null;
+  #closeEditClick = null;
+
+  constructor({ waypoints, offers, destinations, onFormSubmit, onCloseEditClick }) {
+    super();
+
+    this.#waypoints = waypoints;
+    this.#offers = offers;
+    this.#destinations = destinations;
+
+    this.#handleFormSubmit = onFormSubmit;
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
+
+    this.#closeEditClick = onCloseEditClick;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#closeEditClickHandler);
   }
 
-  getTemplate() {
-    return createWaypointEditTemplate(this.waypoints, this.offers, this.destinations);
-  }
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFormSubmit();
+  };
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  #closeEditClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#closeEditClick();
+  };
 
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createWaypointEditTemplate(this.#waypoints, this.#offers, this.#destinations);
   }
 }
