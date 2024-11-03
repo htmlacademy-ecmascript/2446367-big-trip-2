@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { getElementById, getElementByType } from '../utils.js';
 
 function createOfferTemplate ({title, price}) {
@@ -54,26 +54,15 @@ function createWaypointItemTemplate (waypoints, offers, destinations) {
   `);
 }
 
-export default class WaypointItemView {
+export default class WaypointItemView extends AbstractView {
   constructor({ waypoints, offers, destinations }) {
+    super();
     this.waypoints = waypoints;
     this.offers = offers;
     this.destinations = destinations;
   }
 
-  getTemplate() {
+  get template() {
     return createWaypointItemTemplate(this.waypoints, this.offers, this.destinations);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }

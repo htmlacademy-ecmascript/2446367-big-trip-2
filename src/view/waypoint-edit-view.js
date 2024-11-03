@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import { WAYPOINT_TYPE } from '../data.js';
 import { getElementById, getElementByType, capitalizeFirstLetter } from '../utils.js';
 
@@ -149,26 +149,15 @@ function createWaypointEditTemplate (waypoints, offers, destinations) {
   `);
 }
 
-export default class WaypointEdit {
+export default class WaypointEdit extends AbstractView {
   constructor({ waypoints, offers, destinations }) {
+    super();
     this.waypoints = waypoints;
     this.offers = offers;
     this.destinations = destinations;
   }
 
-  getTemplate() {
+  get template() {
     return createWaypointEditTemplate(this.waypoints, this.offers, this.destinations);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }

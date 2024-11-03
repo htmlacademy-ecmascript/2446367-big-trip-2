@@ -1,8 +1,8 @@
-import { render } from '../render.js';
 import WaypointListView from '../view/waypoint-list-view.js';
 import WaypointItemView from '../view/waypoint-item-view.js';
 import ListSortView from '../view/list-sort-view.js';
 import WaypointEdit from '../view/waypoint-edit-view.js';
+import { render } from '../framework/render.js';
 
 export default class BoardPresenter {
   listContainer = new WaypointListView();
@@ -27,14 +27,14 @@ export default class BoardPresenter {
       waypoints: this.boardWaypoints[0],
       offers: offers,
       destinations: destinations,
-    }), this.listContainer.getElement());
+    }), this.listContainer.element);
 
     for (let i = 1; i < this.boardWaypoints.length; i++) {
       render (new WaypointItemView({
         waypoints: this.boardWaypoints[i],
         offers: offers,
         destinations: destinations,
-      }), this.listContainer.getElement());
+      }), this.listContainer.element);
     }
   }
 }
