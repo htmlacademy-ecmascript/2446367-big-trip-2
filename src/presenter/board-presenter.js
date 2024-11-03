@@ -5,36 +5,41 @@ import WaypointEdit from '../view/waypoint-edit-view.js';
 import { render } from '../framework/render.js';
 
 export default class BoardPresenter {
-  listContainer = new WaypointListView();
-  listSortView = new ListSortView();
+  #boardContainer = null;
+  #waypointModel = null;
+
+  #listContainer = new WaypointListView();
+  #listSortView = new ListSortView();
+
+  #boardWaypoints = [];
 
   constructor({ boardContainer, waypointModel }) {
-    this.boardContainer = boardContainer;
-    this.waypointModel = waypointModel;
+    this.#boardContainer = boardContainer;
+    this.#waypointModel = waypointModel;
   }
 
   init() {
-    const waypoints = this.waypointModel.getWaypoints();
-    const offers = this.waypointModel.getOffers();
-    const destinations = this.waypointModel.getDestinations();
+    const waypoints = this.#waypointModel.waypoints;
+    const offers = this.#waypointModel.offers;
+    const destinations = this.#waypointModel.destinations;
 
-    this.boardWaypoints = [...waypoints];
+    this.#boardWaypoints = [...waypoints];
 
-    render(this.listSortView, this.boardContainer);
+    render(this.#listSortView, this.#boardContainer);
 
-    render(this.listContainer, this.boardContainer);
+    render(this.#listContainer, this.#boardContainer);
     render(new WaypointEdit({
-      waypoints: this.boardWaypoints[0],
+      waypoints: this.#boardWaypoints[0],
       offers: offers,
       destinations: destinations,
-    }), this.listContainer.element);
+    }), this.#listContainer.element);
 
-    for (let i = 1; i < this.boardWaypoints.length; i++) {
+    for (let i = 1; i < this.#boardWaypoints.length; i++) {
       render (new WaypointItemView({
-        waypoints: this.boardWaypoints[i],
+        waypoints: this.#boardWaypoints[i],
         offers: offers,
         destinations: destinations,
-      }), this.listContainer.element);
+      }), this.#listContainer.element);
     }
   }
 }
