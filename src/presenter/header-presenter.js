@@ -9,7 +9,6 @@ export default class HeaderPresenter {
   #filters = [];
 
   #headerComponent = new TripInfoView();
-  #listFilterComponent = new ListFilterView({filters: this.#filters});
 
   constructor({ headerContainer, listFiltersContainer, filters }) {
     this.#headerContainer = headerContainer;
@@ -19,6 +18,6 @@ export default class HeaderPresenter {
 
   init() {
     render(this.#headerComponent, this.#headerContainer, RenderPosition.AFTERBEGIN);
-    render(this.#listFilterComponent, this.#listFiltersContainer);
+    render(new ListFilterView({filters: this.#filters}), this.#listFiltersContainer);
   }
 }
