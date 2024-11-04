@@ -1,8 +1,13 @@
 import dayjs from 'dayjs';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import { DateFormat,
   MILLISECONDS_IN_MINUTES,
   SECONDS_IN_MINUTES,
   HOURS_IN_DAY } from '../data.js';
+
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 function humanizeDate(date, format) {
   return date ? dayjs(date).format(format) : '';
@@ -23,4 +28,14 @@ function getDifferenceInTime(start, end) {
   }
 }
 
-export { humanizeDate, getDifferenceInTime };
+const isWaypointFuture = (date) => date && dayjs().isAfter(date);
+const isWaypointPast = (date) => date && dayjs().isBefore(date);
+const isWaypointPastAndFuture = (dateFrom, dateTo) => dayjs().isSameOrBefore(dateFrom) && dayjs().isSameOrAfter(dateTo);
+
+export {
+  humanizeDate,
+  getDifferenceInTime,
+  isWaypointFuture,
+  isWaypointPast,
+  isWaypointPastAndFuture,
+};
