@@ -1,5 +1,7 @@
+import { DateFormat } from '../data.js';
 import AbstractView from '../framework/view/abstract-view.js';
-import { getElementById, getElementByType } from '../utils.js';
+import { getElementById, getElementByType } from '../utils/common.js';
+import { humanizeDate, getDifferenceInTime } from '../utils/waypoints.js';
 
 function createOfferTemplate ({title, price}) {
   return (`
@@ -20,18 +22,18 @@ function createWaypointItemTemplate (waypoints, offers, destinations) {
   return (`
     <li class="trip-events__item">
       <div class="event">
-        <time class="event__date" datetime=${dateFrom}>JUL 10</time>
+        <time class="event__date" datetime=${dateFrom}>${humanizeDate(dateFrom, DateFormat.MONTH_DAY)}</time>
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
         </div>
         <h3 class="event__title">${type} ${name}</h3>
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime=${dateFrom}>10:30</time>
+            <time class="event__start-time" datetime=${dateFrom}>${humanizeDate(dateFrom, DateFormat.HOUR_MINUTES)}</time>
             &mdash;
-            <time class="event__end-time" datetime=${dateTo}>11:00</time>
+            <time class="event__end-time" datetime=${dateTo}>${humanizeDate(dateTo, DateFormat.HOUR_MINUTES)}</time>
           </p>
-          <p class="event__duration">30M</p>
+          <p class="event__duration">${getDifferenceInTime(dateFrom, dateTo)}</p>
         </div>
         <p class="event__price">
           &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
