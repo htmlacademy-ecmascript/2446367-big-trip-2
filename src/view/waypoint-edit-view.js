@@ -1,6 +1,7 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { WAYPOINT_TYPE } from '../data.js';
-import { getElementById, getElementByType, capitalizeFirstLetter } from '../utils.js';
+import { WAYPOINT_TYPE, DateFormat } from '../data.js';
+import { getElementById, getElementByType, capitalizeFirstLetter } from '../utils/common.js';
+import { humanizeDate } from '../utils/waypoints.js';
 
 function createTypeTemplate (type, checkedType, id) {
   const isChecked = checkedType === type ? 'checked' : false;
@@ -83,7 +84,7 @@ function createDestinationTemplate (destination) {
 }
 
 function createWaypointEditTemplate (waypoints, offers, destinations) {
-  const { id, type, basePrice, offers: checkedOffers, destination: waypointDestination } = waypoints;
+  const { id, type, dateFrom, dateTo, basePrice, offers: checkedOffers, destination: waypointDestination } = waypoints;
   const filterOfferByType = getElementByType(offers, type);
   const filterDestinationById = getElementById(destinations, waypointDestination);
   const { name } = filterDestinationById;
@@ -120,10 +121,10 @@ function createWaypointEditTemplate (waypoints, offers, destinations) {
 
             <div class="event__field-group  event__field-group--time">
               <label class="visually-hidden" for="event-start-time-${id}">From</label>
-              <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="10/07/2019 10:00">
+              <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value=${humanizeDate(dateFrom, DateFormat.DAY_MONTH_YEAR)}>
               &mdash;
               <label class="visually-hidden" for="event-end-time-${id}">To</label>
-              <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value="11/07/2019 10:00">
+              <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value=${humanizeDate(dateTo, DateFormat.DAY_MONTH_YEAR)}>
             </div>
 
             <div class="event__field-group  event__field-group--price">
