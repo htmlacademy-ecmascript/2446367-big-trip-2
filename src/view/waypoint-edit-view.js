@@ -174,7 +174,7 @@ export default class WaypointEditView extends AbstractView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit();
+    this.#handleFormSubmit(this.#waypoint);
   };
 
   #closeEditClickHandler = (evt) => {

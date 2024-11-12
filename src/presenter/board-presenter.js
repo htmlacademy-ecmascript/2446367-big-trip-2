@@ -1,4 +1,5 @@
 import { render } from '../framework/render.js';
+import { updateItem } from '../utils/common.js';
 import WaypointListView from '../view/waypoint-list-view.js';
 import ListSortView from '../view/list-sort-view.js';
 import NoWaypointView from '../view/no-waypoint-view.js';
@@ -31,11 +32,19 @@ export default class BoardPresenter {
   }
 
   #renderWaypointItem({ waypoint, offers, destinations }) {
-    const waypointPresenter = new WaypointPresenter({ waypointListContainer: this.#waypointListContainer.element });
+    const waypointPresenter = new WaypointPresenter({
+      waypointListContainer: this.#waypointListContainer.element,
+      onDataChange: this.#handleWaypointChange,
+    });
 
     waypointPresenter.init(waypoint, offers, destinations);
     this.#waypointPresenters.set(waypoint.id, waypointPresenter);
   }
+
+  #handleWaypointChange = (updatedWaypoint) => {
+    this.#boardWaypoints = updateItem(this.#boardWaypoints, updatedWaypoint);
+    this.#waypointPresenters.get(updatedWaypoint.id).init(updatedWaypoint, this.#boardOffers, this.#boardDestinations);
+  };
 
   #renderWaypoints() {
     render(this.#waypointListContainer, this.#boardContainer);

@@ -15,4 +15,15 @@ const randomBoolean = () => Math.random() < 0.5;
 
 const capitalizeFirstLetter = (str) => str[0].toUpperCase() + str.slice(1);
 
-export { getRandomArrayElements, getElementByType, getElementById, randomBoolean, capitalizeFirstLetter };
+function updateItem(items, update) {
+  return items.map((item) => item.id === update.id ? update : item);
+}
+
+export {
+  getRandomArrayElements,
+  getElementByType,
+  getElementById,
+  randomBoolean,
+  capitalizeFirstLetter,
+  updateItem
+};

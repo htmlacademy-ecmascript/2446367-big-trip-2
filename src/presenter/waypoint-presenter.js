@@ -4,6 +4,7 @@ import WaypointEditView from '../view/waypoint-edit-view.js';
 
 export default class WaypointPresenter {
   #waypointListContainer = null;
+  #handleDataChange = null;
 
   #waypointComponent = null;
   #waypointEditComponent = null;
@@ -12,8 +13,9 @@ export default class WaypointPresenter {
   #offers = null;
   #destinations = null;
 
-  constructor({waypointListContainer}) {
+  constructor({ waypointListContainer, onDataChange }) {
     this.#waypointListContainer = waypointListContainer;
+    this.#handleDataChange = onDataChange;
   }
 
   init(waypoint, offers, destinations) {
@@ -29,6 +31,7 @@ export default class WaypointPresenter {
       offers: this.#offers,
       destinations: this.#destinations,
       onEditClick: this.#handleEditClick,
+      onFavoriteClick: this.#handleFavoriteClick,
     });
 
     this.#waypointEditComponent = new WaypointEditView({
@@ -78,7 +81,8 @@ export default class WaypointPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
-  #handleFormSubmit = () => {
+  #handleFormSubmit = (waypoint) => {
+    this.#handleDataChange(waypoint);
     this.#replaceFormToCard();
   };
 
@@ -88,5 +92,9 @@ export default class WaypointPresenter {
 
   #handleEditClick = () => {
     this.#replaceCardToForm();
+  };
+
+  #handleFavoriteClick = () => {
+    this.#handleDataChange({ ...this.#waypoint, isFavorite: !this.#waypoint.isFavorite });
   };
 }
