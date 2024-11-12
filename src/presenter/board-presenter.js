@@ -11,6 +11,7 @@ export default class BoardPresenter {
 
   #listContainer = new WaypointListView();
   #listSortView = new ListSortView();
+  #noWaypointView = new NoWaypointView();
 
   #boardWaypoints = [];
   #boardOffers = [];
@@ -27,6 +28,14 @@ export default class BoardPresenter {
     this.#boardDestinations = [...this.#waypointModel.destinations];
 
     this.#renderBoard();
+  }
+
+  #renderSort() {
+    render(this.#listSortView, this.#boardContainer);
+  }
+
+  #renderNoWaypoint() {
+    render(this.#noWaypointView, this.#boardContainer);
   }
 
   #renderWaypointItem({waypoints, offers, destinations}) {
@@ -76,14 +85,7 @@ export default class BoardPresenter {
     render(waypointItemComponent, this.#listContainer.element);
   }
 
-  #renderBoard() {
-    render(this.#listSortView, this.#boardContainer);
-
-    if (this.#boardWaypoints.length === 0) {
-      render(new NoWaypointView, this.#boardContainer);
-      return;
-    }
-
+  #renderWaypoints() {
     render(this.#listContainer, this.#boardContainer);
 
     for (let i = 0; i < this.#boardWaypoints.length; i++) {
@@ -93,5 +95,15 @@ export default class BoardPresenter {
         destinations: this.#boardDestinations,
       });
     }
+  }
+
+  #renderBoard() {
+    if (this.#boardWaypoints.length === 0) {
+      this.#renderNoWaypoint();
+      return;
+    }
+
+    this.#renderSort();
+    this.#renderWaypoints();
   }
 }
