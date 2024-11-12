@@ -16,7 +16,7 @@ const mockWaypoints = [
   {
     'id': 'f4b62099-293f-4c3d-a702-94eec4a2808c-002',
     'basePrice': 2100,
-    'dateFrom': '2019-07-11T05:55:56.845Z',
+    'dateFrom': '2019-07-11T07:55:56.845Z',
     'dateTo': '2019-07-12T08:25:13.375Z',
     'destination': 'cfe416cq-10xa-ye10-8077-2fs9a01edcab-002',
     'isFavorite': randomBoolean(),
@@ -28,7 +28,7 @@ const mockWaypoints = [
   {
     'id': 'f4b62099-293f-4c3d-a702-94eec4a2808c-003',
     'basePrice': 100,
-    'dateFrom': '2019-07-12T01:50:56.845Z',
+    'dateFrom': '2019-07-12T10:20:56.845Z',
     'dateTo': '2019-07-13T02:30:13.375Z',
     'destination': 'cfe416cq-10xa-ye10-8077-2fs9a01edcab-004',
     'isFavorite': randomBoolean(),

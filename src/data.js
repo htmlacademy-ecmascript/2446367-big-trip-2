@@ -7,11 +7,9 @@ const FilterType = {
   PAST: 'past',
 };
 
-const MILLISECONDS_IN_MINUTES = 60000;
+const MILLISECONDS_IN_HOUR = 3600000;
 
-const SECONDS_IN_MINUTES = 60;
-
-const HOURS_IN_DAY = 24;
+const MILLISECONDS_IN_DAY = 86400000;
 
 const DateFormat = {
   DAY_MONTH: 'D MMM',
@@ -28,12 +26,20 @@ const Mode = {
   EDITING: 'EDITING',
 };
 
+const SortType = {
+  DAY: 'day',
+  EVENT: 'event',
+  TIME: 'time',
+  PRICE: 'price',
+  OFFERS: 'offers',
+};
+
 export {
   WAYPOINT_TYPE,
   FilterType,
   DateFormat,
-  MILLISECONDS_IN_MINUTES,
-  SECONDS_IN_MINUTES,
-  HOURS_IN_DAY,
-  Mode
+  MILLISECONDS_IN_HOUR,
+  MILLISECONDS_IN_DAY,
+  Mode,
+  SortType
 };

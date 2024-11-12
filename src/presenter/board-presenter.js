@@ -1,22 +1,27 @@
 import { render } from '../framework/render.js';
 import { updateItem } from '../utils/common.js';
+import { sortByTime, sortByPrice } from '../utils/waypoints.js';
 import WaypointListView from '../view/waypoint-list-view.js';
 import ListSortView from '../view/list-sort-view.js';
 import NoWaypointView from '../view/no-waypoint-view.js';
 import WaypointPresenter from './waypoint-presenter.js';
+import { SortType } from '../data.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
   #waypointModel = null;
+  #sortComponent = null;
 
   #waypointListContainer = new WaypointListView();
-  #listSortView = new ListSortView();
   #noWaypointView = new NoWaypointView();
 
   #boardWaypoints = [];
   #boardOffers = [];
   #boardDestinations = [];
   #waypointPresenters = new Map();
+  #sourcedWaypoints = [];
+
+  #currentSortType = SortType.DAY;
 
   constructor({ boardContainer, waypointModel }) {
     this.#boardContainer = boardContainer;
@@ -27,6 +32,7 @@ export default class BoardPresenter {
     this.#boardWaypoints = [...this.#waypointModel.waypoints];
     this.#boardOffers = [...this.#waypointModel.offers];
     this.#boardDestinations = [...this.#waypointModel.destinations];
+    this.#sourcedWaypoints = [...this.#waypointModel.waypoints];
 
     this.#renderBoard();
   }
@@ -63,8 +69,37 @@ export default class BoardPresenter {
     }
   }
 
+  #sortWaypoints(sortType) {
+    switch (sortType) {
+      case SortType.TIME:
+        this.#boardWaypoints.sort(sortByTime);
+        break;
+      case SortType.PRICE:
+        this.#boardWaypoints.sort(sortByPrice);
+        break;
+      default:
+        this.#boardWaypoints = [...this.#sourcedWaypoints];
+    }
+
+    this.#currentSortType = sortType;
+  }
+
+  #handleSortTypeChange = (sortType) => {
+    if (sortType === this.#currentSortType) {
+      return;
+    }
+
+    this.#sortWaypoints(sortType);
+    this.#clearWaypointList();
+    this.#renderWaypoints();
+  };
+
   #renderSort() {
-    render(this.#listSortView, this.#boardContainer);
+    this.#sortComponent = new ListSortView({
+      onSortTypeChange: this.#handleSortTypeChange
+    });
+
+    render(this.#sortComponent, this.#boardContainer);
   }
 
   #renderNoWaypoint() {
