@@ -57,16 +57,16 @@ function createWaypointItemTemplate (waypoints, offers, destinations) {
 }
 
 export default class WaypointItemView extends AbstractView {
-  #waypoints = null;
+  #waypoint = null;
   #offers = null;
   #destinations = null;
 
   #handleEditClick = null;
 
-  constructor({ waypoints, offers, destinations, onEditClick }) {
+  constructor({ waypoint, offers, destinations, onEditClick }) {
     super();
 
-    this.#waypoints = waypoints;
+    this.#waypoint = waypoint;
     this.#offers = offers;
     this.#destinations = destinations;
 
@@ -80,6 +80,6 @@ export default class WaypointItemView extends AbstractView {
   };
 
   get template() {
-    return createWaypointItemTemplate(this.#waypoints, this.#offers, this.#destinations);
+    return createWaypointItemTemplate(this.#waypoint, this.#offers, this.#destinations);
   }
 }
