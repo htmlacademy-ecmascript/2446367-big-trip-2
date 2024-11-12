@@ -1,3 +1,4 @@
+import { Mode } from '../data.js';
 import { render, replace, remove } from '../framework/render.js';
 import WaypointItemView from '../view/waypoint-item-view.js';
 import WaypointEditView from '../view/waypoint-edit-view.js';
@@ -5,6 +6,7 @@ import WaypointEditView from '../view/waypoint-edit-view.js';
 export default class WaypointPresenter {
   #waypointListContainer = null;
   #handleDataChange = null;
+  #handleModeChange = null;
 
   #waypointComponent = null;
   #waypointEditComponent = null;
@@ -12,10 +14,12 @@ export default class WaypointPresenter {
   #waypoint = null;
   #offers = null;
   #destinations = null;
+  #mode = Mode.DEFAULT;
 
-  constructor({ waypointListContainer, onDataChange }) {
+  constructor({ waypointListContainer, onDataChange, onModeChange }) {
     this.#waypointListContainer = waypointListContainer;
     this.#handleDataChange = onDataChange;
+    this.#handleModeChange = onModeChange;
   }
 
   init(waypoint, offers, destinations) {
@@ -47,11 +51,11 @@ export default class WaypointPresenter {
       return;
     }
 
-    if (this.#waypointListContainer.contains(prevWaypointComponent.element)) {
+    if (this.#mode === Mode.DEFAULT) {
       replace(this.#waypointComponent, prevWaypointComponent);
     }
 
-    if (this.#waypointListContainer.contains(prevWaypointEditComponent.element)) {
+    if (this.#mode === Mode.EDITING) {
       replace(this.#waypointEditComponent, prevWaypointEditComponent);
     }
 
@@ -64,6 +68,12 @@ export default class WaypointPresenter {
     remove(this.#waypointEditComponent);
   }
 
+  resetView() {
+    if (this.#mode !== Mode.DEFAULT) {
+      this.#replaceFormToCard();
+    }
+  }
+
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
@@ -74,11 +84,14 @@ export default class WaypointPresenter {
   #replaceCardToForm() {
     replace(this.#waypointEditComponent, this.#waypointComponent);
     document.addEventListener('keydown', this.#escKeyDownHandler);
+    this.#handleModeChange();
+    this.#mode = Mode.EDITING;
   }
 
   #replaceFormToCard() {
     replace(this.#waypointComponent, this.#waypointEditComponent);
     document.removeEventListener('keydown', this.#escKeyDownHandler);
+    this.#mode = Mode.DEFAULT;
   }
 
   #handleFormSubmit = (waypoint) => {

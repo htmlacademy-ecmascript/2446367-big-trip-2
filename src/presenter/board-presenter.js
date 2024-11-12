@@ -35,6 +35,7 @@ export default class BoardPresenter {
     const waypointPresenter = new WaypointPresenter({
       waypointListContainer: this.#waypointListContainer.element,
       onDataChange: this.#handleWaypointChange,
+      onModeChange: this.#handleModeChange,
     });
 
     waypointPresenter.init(waypoint, offers, destinations);
@@ -44,6 +45,10 @@ export default class BoardPresenter {
   #handleWaypointChange = (updatedWaypoint) => {
     this.#boardWaypoints = updateItem(this.#boardWaypoints, updatedWaypoint);
     this.#waypointPresenters.get(updatedWaypoint.id).init(updatedWaypoint, this.#boardOffers, this.#boardDestinations);
+  };
+
+  #handleModeChange = () => {
+    this.#waypointPresenters.forEach((waypointPresenter) => waypointPresenter.resetView());
   };
 
   #renderWaypoints() {

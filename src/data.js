@@ -23,10 +23,17 @@ const DateFormat = {
   DAY_HOUR_MINUTES_WITH_POSTFIX: 'DD[D] HH[H] mm[M]',
 };
 
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
+
 export {
   WAYPOINT_TYPE,
   FilterType,
   DateFormat,
   MILLISECONDS_IN_MINUTES,
   SECONDS_IN_MINUTES,
-  HOURS_IN_DAY };
+  HOURS_IN_DAY,
+  Mode
+};
