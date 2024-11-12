@@ -1,20 +1,22 @@
+import { render } from '../framework/render.js';
+import { updateItem } from '../utils/common.js';
 import WaypointListView from '../view/waypoint-list-view.js';
-import WaypointItemView from '../view/waypoint-item-view.js';
-import WaypointEditView from '../view/waypoint-edit-view.js';
 import ListSortView from '../view/list-sort-view.js';
-import { render, replace } from '../framework/render.js';
 import NoWaypointView from '../view/no-waypoint-view.js';
+import WaypointPresenter from './waypoint-presenter.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
   #waypointModel = null;
 
-  #listContainer = new WaypointListView();
+  #waypointListContainer = new WaypointListView();
   #listSortView = new ListSortView();
+  #noWaypointView = new NoWaypointView();
 
   #boardWaypoints = [];
   #boardOffers = [];
   #boardDestinations = [];
+  #waypointPresenters = new Map();
 
   constructor({ boardContainer, waypointModel }) {
     this.#boardContainer = boardContainer;
@@ -29,69 +31,58 @@ export default class BoardPresenter {
     this.#renderBoard();
   }
 
-  #renderWaypointItem({waypoints, offers, destinations}) {
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        replaceFormToCard();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    };
-
-    const waypointItemComponent = new WaypointItemView({
-      waypoints,
-      offers,
-      destinations,
-
-      onEditClick: () => {
-        replaceCardToForm();
-        document.addEventListener('keydown', escKeyDownHandler);
-      },
+  #renderWaypointItem({ waypoint, offers, destinations }) {
+    const waypointPresenter = new WaypointPresenter({
+      waypointListContainer: this.#waypointListContainer.element,
+      onDataChange: this.#handleWaypointChange,
+      onModeChange: this.#handleModeChange,
     });
 
-    const waypointEditComponent = new WaypointEditView({
-      waypoints,
-      offers,
-      destinations,
-
-      onFormSubmit: () => {
-        replaceFormToCard();
-        document.addEventListener('keydown', escKeyDownHandler);
-      },
-
-      onCloseEditClick: () => {
-        replaceFormToCard();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    });
-
-    function replaceCardToForm() {
-      replace(waypointEditComponent, waypointItemComponent);
-    }
-
-    function replaceFormToCard() {
-      replace(waypointItemComponent, waypointEditComponent);
-    }
-
-    render(waypointItemComponent, this.#listContainer.element);
+    waypointPresenter.init(waypoint, offers, destinations);
+    this.#waypointPresenters.set(waypoint.id, waypointPresenter);
   }
 
-  #renderBoard() {
-    render(this.#listSortView, this.#boardContainer);
+  #handleWaypointChange = (updatedWaypoint) => {
+    this.#boardWaypoints = updateItem(this.#boardWaypoints, updatedWaypoint);
+    this.#waypointPresenters.get(updatedWaypoint.id).init(updatedWaypoint, this.#boardOffers, this.#boardDestinations);
+  };
 
-    if (this.#boardWaypoints.length === 0) {
-      render(new NoWaypointView, this.#boardContainer);
-      return;
-    }
+  #handleModeChange = () => {
+    this.#waypointPresenters.forEach((waypointPresenter) => waypointPresenter.resetView());
+  };
 
-    render(this.#listContainer, this.#boardContainer);
+  #renderWaypoints() {
+    render(this.#waypointListContainer, this.#boardContainer);
 
     for (let i = 0; i < this.#boardWaypoints.length; i++) {
       this.#renderWaypointItem({
-        waypoints: this.#boardWaypoints[i],
+        waypoint: this.#boardWaypoints[i],
         offers: this.#boardOffers,
         destinations: this.#boardDestinations,
       });
     }
+  }
+
+  #renderSort() {
+    render(this.#listSortView, this.#boardContainer);
+  }
+
+  #renderNoWaypoint() {
+    render(this.#noWaypointView, this.#boardContainer);
+  }
+
+  #clearWaypointList() {
+    this.#waypointPresenters.forEach((presenter) => presenter.destroy());
+    this.#waypointPresenters.clear();
+  }
+
+  #renderBoard() {
+    if (this.#boardWaypoints.length === 0) {
+      this.#renderNoWaypoint();
+      return;
+    }
+
+    this.#renderSort();
+    this.#renderWaypoints();
   }
 }

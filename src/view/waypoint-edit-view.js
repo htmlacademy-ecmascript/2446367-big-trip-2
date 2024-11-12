@@ -151,17 +151,17 @@ function createWaypointEditTemplate (waypoints, offers, destinations) {
 }
 
 export default class WaypointEditView extends AbstractView {
-  #waypoints = null;
+  #waypoint = null;
   #offers = null;
   #destinations = null;
 
   #handleFormSubmit = null;
   #closeEditClick = null;
 
-  constructor({ waypoints, offers, destinations, onFormSubmit, onCloseEditClick }) {
+  constructor({ waypoint, offers, destinations, onFormSubmit, onCloseEditClick }) {
     super();
 
-    this.#waypoints = waypoints;
+    this.#waypoint = waypoint;
     this.#offers = offers;
     this.#destinations = destinations;
 
@@ -174,7 +174,7 @@ export default class WaypointEditView extends AbstractView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit();
+    this.#handleFormSubmit(this.#waypoint);
   };
 
   #closeEditClickHandler = (evt) => {
@@ -183,6 +183,6 @@ export default class WaypointEditView extends AbstractView {
   };
 
   get template() {
-    return createWaypointEditTemplate(this.#waypoints, this.#offers, this.#destinations);
+    return createWaypointEditTemplate(this.#waypoint, this.#offers, this.#destinations);
   }
 }
