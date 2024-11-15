@@ -1,7 +1,7 @@
+import { generateFilter } from './mock/mock-filter.js';
 import HeaderPresenter from './presenter/header-presenter.js';
 import BoardPresenter from './presenter/board-presenter.js';
 import WaypointsModel from './model/waypoints-model.js';
-import { generateFilter } from './mock/mock-filter.js';
 
 const tripInfoContainer = document.querySelector('.trip-main');
 const filtersContainer = document.querySelector('.trip-controls__filters');
