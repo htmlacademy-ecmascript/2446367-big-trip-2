@@ -25,7 +25,7 @@ const mockDestinations = [
   {
     'id': 'cfe416cq-10xa-ye10-8077-2fs9a01edcab-003',
     'description': 'Novi Pazar is a city located in southwestern Serbia.',
-    'name': 'Novi Pazar',
+    'name': 'Novi&nbsp;Pazar',
     'pictures': [
       {
         'src': 'https://loremflickr.com/248/152?random=3',
@@ -59,7 +59,7 @@ const mockDestinations = [
   {
     'id': 'cfe416cq-10xa-ye10-8077-2fs9a01edcab-005',
     'description': 'Novi Sad is the second largest city in Serbia after the capital Belgrade',
-    'name': 'Novi Sad',
+    'name': 'Novi&nbsp;Sad',
     'pictures': [
       {
         'src': 'https://loremflickr.com/248/152?random=20',

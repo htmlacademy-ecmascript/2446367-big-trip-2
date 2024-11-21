@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { WAYPOINT_TYPE, DateFormat } from '../data.js';
 import { getElementById, getElementByType, capitalizeFirstLetter } from '../utils/common.js';
 import { humanizeDate } from '../utils/waypoints.js';
@@ -115,7 +115,7 @@ function createWaypointEditTemplate (waypoints, offers, destinations) {
               </label>
               <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${name}" list="destination-list-${id}">
               <datalist id="destination-list-${id}">
-                ${destinations.map((destination) => `<option value=${destination.name}></option>`)}
+                  ${destinations.map((destination) => `<option value=${destination.name}></option>`).join('')}
               </datalist>
             </div>
 
@@ -150,7 +150,7 @@ function createWaypointEditTemplate (waypoints, offers, destinations) {
   `);
 }
 
-export default class WaypointEditView extends AbstractView {
+export default class WaypointEditView extends AbstractStatefulView {
   #waypoint = null;
   #offers = null;
   #destinations = null;
@@ -161,20 +161,27 @@ export default class WaypointEditView extends AbstractView {
   constructor({ waypoint, offers, destinations, onFormSubmit, onCloseEditClick }) {
     super();
 
-    this.#waypoint = waypoint;
+    this._setState(WaypointEditView.parceWaypointToState(waypoint));
     this.#offers = offers;
     this.#destinations = destinations;
 
     this.#handleFormSubmit = onFormSubmit;
-    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
-
     this.#closeEditClick = onCloseEditClick;
+
+    this._restoreHandlers();
+  }
+
+  _restoreHandlers() {
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#closeEditClickHandler);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationInputHandler);
+    this.element.querySelector('.event__available-offers')?.addEventListener('change',this.#changeOffersCheckedHandler);
   }
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit(this.#waypoint);
+    this.#handleFormSubmit(this._state);
   };
 
   #closeEditClickHandler = (evt) => {
@@ -182,7 +189,35 @@ export default class WaypointEditView extends AbstractView {
     this.#closeEditClick();
   };
 
+  #changeTypeHandler = (evt) => {
+    evt.preventDefault();
+
+    this.updateElement({
+      type: evt.target.value
+    });
+  };
+
+  #destinationInputHandler = (evt) => {
+    this.updateElement({
+      destination: this.#destinations.find((destination) => destination.name === evt.target.value).id
+    });
+  };
+
+  #changeOffersCheckedHandler = () => {
+    this._setState({
+      offers: Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'))
+    });
+  };
+
+  static parceWaypointToState(waypoint) {
+    return {...waypoint};
+  }
+
+  static parceStateToWaypoint(waypoint) {
+    return {...waypoint};
+  }
+
   get template() {
-    return createWaypointEditTemplate(this.#waypoint, this.#offers, this.#destinations);
+    return createWaypointEditTemplate(this._state, this.#offers, this.#destinations);
   }
 }

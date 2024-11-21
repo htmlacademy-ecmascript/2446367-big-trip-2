@@ -28,6 +28,7 @@ export default class ListFilterView extends AbstractView {
 
   constructor({filters}) {
     super();
+
     this.#filters = filters;
   }
 
