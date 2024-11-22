@@ -2,6 +2,8 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { WAYPOINT_TYPE, DateFormat } from '../data.js';
 import { getElementById, getElementByType, capitalizeFirstLetter } from '../utils/common.js';
 import { humanizeDate } from '../utils/waypoints.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 function createTypeTemplate (type, checkedType, id) {
   const isChecked = checkedType === type ? 'checked' : false;
@@ -158,6 +160,9 @@ export default class WaypointEditView extends AbstractStatefulView {
   #handleFormSubmit = null;
   #closeEditClick = null;
 
+  #datepickerFrom = null;
+  #datepickerTo = null;
+
   constructor({ waypoint, offers, destinations, onFormSubmit, onCloseEditClick }) {
     super();
 
@@ -177,11 +182,13 @@ export default class WaypointEditView extends AbstractStatefulView {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationInputHandler);
     this.element.querySelector('.event__available-offers')?.addEventListener('change',this.#changeOffersCheckedHandler);
+
+    this.#setDatePicker();
   }
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit(this._state);
+    this.#handleFormSubmit(WaypointEditView.parceWaypointToState(this._state));
   };
 
   #closeEditClickHandler = (evt) => {
@@ -193,7 +200,7 @@ export default class WaypointEditView extends AbstractStatefulView {
     evt.preventDefault();
 
     this.updateElement({
-      type: evt.target.value
+      type: evt.target.value,
     });
   };
 
@@ -205,9 +212,51 @@ export default class WaypointEditView extends AbstractStatefulView {
 
   #changeOffersCheckedHandler = () => {
     this._setState({
-      offers: Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'))
+      offers: Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked')).map((item) => item.id),
     });
   };
+
+  #dateFromChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateFrom: userDate,
+    });
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateTo: userDate,
+    });
+  };
+
+  #setDatePicker() {
+    const [dateFromElement, dateToElement] = this.element.querySelectorAll('.event__input--time');
+
+    this.#datepickerFrom = flatpickr(
+      dateFromElement,
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        // eslint-disable-next-line camelcase
+        time_24hr: true,
+        locale: { firstDayOfWeek: 1 },
+        defaultDate: this._state.dateFrom,
+        maxDate: this._state.dateTo,
+        onChange: this.#dateFromChangeHandler,
+      });
+
+    this.#datepickerTo = flatpickr(
+      dateToElement,
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        // eslint-disable-next-line camelcase
+        time_24hr: true,
+        locale: { firstDayOfWeek: 1 },
+        defaultDate: this._state.dateTo,
+        minDate: this._state.dateFrom,
+        onChange: this.#dateToChangeHandler,
+      });
+  }
 
   static parceWaypointToState(waypoint) {
     return {...waypoint};
@@ -219,5 +268,25 @@ export default class WaypointEditView extends AbstractStatefulView {
 
   get template() {
     return createWaypointEditTemplate(this._state, this.#offers, this.#destinations);
+  }
+
+  reset (waypoint) {
+    this.updateElement(
+      WaypointEditView.parceWaypointToState(waypoint),
+    );
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if(this.#datepickerFrom) {
+      this.#datepickerFrom.destroy();
+      this.#datepickerFrom = null;
+    }
+
+    if(this.#datepickerTo) {
+      this.#datepickerTo.destroy();
+      this.#datepickerTo = null;
+    }
   }
 }
