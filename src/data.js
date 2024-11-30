@@ -44,6 +44,23 @@ const SortType = {
   OFFERS: 'offers',
 };
 
+const UserAction = {
+  UPDATE_WAYPOINT: 'UPDATE_WAYPOINT',
+  ADD_WAYPOINT: 'ADD_WAYPOINT',
+  DELETE_WAYPOINT: 'DELETE_WAYPOINT',
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
+const TypeButtonReset = {
+  DELETE: 'delete',
+  CANCEL: 'cancel',
+};
+
 export {
   WAYPOINT_TYPE,
   FilterType,
@@ -51,5 +68,8 @@ export {
   MILLISECONDS_IN_HOUR,
   MILLISECONDS_IN_DAY,
   Mode,
-  SortType
+  SortType,
+  UserAction,
+  UpdateType,
+  TypeButtonReset,
 };

@@ -1,15 +1,15 @@
-import { Mode } from '../data.js';
+import { Mode, UserAction, UpdateType } from '../data.js';
 import { render, replace, remove } from '../framework/render.js';
 import WaypointItemView from '../view/waypoint-item-view.js';
 import WaypointEditView from '../view/waypoint-edit-view.js';
 
 export default class WaypointPresenter {
   #waypointListContainer = null;
-  #handleDataChange = null;
-  #handleModeChange = null;
-
   #waypointComponent = null;
   #waypointEditComponent = null;
+
+  #handleDataChange = null;
+  #handleModeChange = null;
 
   #waypoint = null;
   #offers = null;
@@ -44,6 +44,7 @@ export default class WaypointPresenter {
       destinations: this.#destinations,
       onFormSubmit: this.#handleFormSubmit,
       onCloseEditClick: this.#closeEditClick,
+      onResetClick: this.#handleResetClick,
     });
 
     if (prevWaypointComponent === null || prevWaypointEditComponent === null) {
@@ -97,8 +98,20 @@ export default class WaypointPresenter {
   }
 
   #handleFormSubmit = (waypoint) => {
-    this.#handleDataChange(waypoint);
+    this.#handleDataChange(
+      UserAction.UPDATE_WAYPOINT,
+      UpdateType.PATCH,
+      waypoint
+    );
     this.#replaceFormToCard();
+  };
+
+  #handleResetClick = (waypoint) => {
+    this.#handleDataChange(
+      UserAction.DELETE_WAYPOINT,
+      UpdateType.MINOR,
+      waypoint,
+    );
   };
 
   #closeEditClick = () => {
@@ -111,6 +124,10 @@ export default class WaypointPresenter {
   };
 
   #handleFavoriteClick = () => {
-    this.#handleDataChange({ ...this.#waypoint, isFavorite: !this.#waypoint.isFavorite });
+    this.#handleDataChange(
+      UserAction.UPDATE_WAYPOINT,
+      UpdateType.PATCH,
+      { ...this.#waypoint, isFavorite: !this.#waypoint.isFavorite },
+    );
   };
 }
