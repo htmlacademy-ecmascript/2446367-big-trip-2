@@ -1,3 +1,8 @@
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
+
 const WAYPOINT_TYPE = [
   'taxi',
   'bus',
@@ -9,6 +14,17 @@ const WAYPOINT_TYPE = [
   'sightseeing',
   'restaurant'
 ];
+
+const DEFAULT_WAYPOINT = {
+  id: 0,
+  basePrice: 0,
+  dateFrom: dayjs.utc().format(),
+  dateTo: dayjs.utc().format(),
+  destination: '',
+  isFavorite: false,
+  offers: [],
+  type: 'flight',
+};
 
 const FilterType = {
   EVERYTHING: 'everything',
@@ -56,13 +72,9 @@ const UpdateType = {
   MAJOR: 'MAJOR',
 };
 
-const TypeButtonReset = {
-  DELETE: 'delete',
-  CANCEL: 'cancel',
-};
-
 export {
   WAYPOINT_TYPE,
+  DEFAULT_WAYPOINT,
   FilterType,
   DateFormat,
   MILLISECONDS_IN_HOUR,
@@ -71,5 +83,4 @@ export {
   SortType,
   UserAction,
   UpdateType,
-  TypeButtonReset,
 };

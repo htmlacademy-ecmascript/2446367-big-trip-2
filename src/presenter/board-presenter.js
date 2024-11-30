@@ -6,6 +6,7 @@ import { remove, render } from '../framework/render.js';
 import { FilterType, SortType, UpdateType, UserAction } from '../data.js';
 import { filter } from '../utils/filter.js';
 import { sortByTime, sortByPrice } from '../utils/waypoints.js';
+import NewWaypointPresenter from './new-waypoint-presenter.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
@@ -13,6 +14,8 @@ export default class BoardPresenter {
 
   #waypointModel = null;
   #filterModel = null;
+
+  #newWaypointPresenter = null;
 
   #waypointListComponent = new WaypointListView();
   #noWaypointComponent = new NoWaypointView();
@@ -25,10 +28,17 @@ export default class BoardPresenter {
   #currentSortType = SortType.DAY;
   #filterType = FilterType.EVERYTHING;
 
-  constructor({ boardContainer, waypointModel, filterModel }) {
+  constructor({ boardContainer, waypointModel, filterModel, onNewWaypointDestroy }) {
     this.#boardContainer = boardContainer;
     this.#waypointModel = waypointModel;
     this.#filterModel = filterModel;
+
+    this.#newWaypointPresenter = new NewWaypointPresenter({
+      waypointListContainer: this.#waypointListComponent.element,
+      waypointModel: this.#waypointModel,
+      onDataChange: this.#handleViewAction,
+      onDestroy: onNewWaypointDestroy,
+    });
 
     this.#waypointModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -41,9 +51,9 @@ export default class BoardPresenter {
 
     switch(this.#currentSortType) {
       case SortType.TIME:
-        return filterWaypoint.sort(sortByTime);
+        return [...filterWaypoint].sort(sortByTime);
       case SortType.PRICE:
-        return filterWaypoint.sort(sortByPrice);
+        return [...filterWaypoint].sort(sortByPrice);
     }
 
     return filterWaypoint;
@@ -54,6 +64,12 @@ export default class BoardPresenter {
     this.#boardDestinations = [...this.#waypointModel.destinations];
 
     this.#renderBoard();
+  }
+
+  createWaypoint() {
+    this.#currentSortType = SortType.DAY;
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#newWaypointPresenter.init();
   }
 
   #renderWaypointItem({ waypoint, offers, destinations }) {
@@ -115,6 +131,7 @@ export default class BoardPresenter {
   };
 
   #handleModeChange = () => {
+    this.#newWaypointPresenter.destroy();
     this.#waypointPresenters.forEach((presenter) => presenter.resetView());
   };
 
@@ -125,6 +142,7 @@ export default class BoardPresenter {
   };
 
   #clearBoard({ resetSortType = false } = {}) {
+    this.#newWaypointPresenter.destroy();
     this.#waypointPresenters.forEach((presenter) => presenter.destroy());
     this.#waypointPresenters.clear();
 

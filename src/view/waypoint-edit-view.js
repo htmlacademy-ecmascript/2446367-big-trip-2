@@ -1,7 +1,8 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { WAYPOINT_TYPE, DateFormat, TypeButtonReset } from '../data.js';
+import { WAYPOINT_TYPE, DateFormat } from '../data.js';
 import { getElementById, getElementByType, capitalizeFirstLetter } from '../utils/common.js';
 import { humanizeDate } from '../utils/waypoints.js';
+import { DEFAULT_WAYPOINT } from '../data.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
@@ -68,9 +69,8 @@ function createPhotoContainerTemplate (pictures) {
   return '';
 }
 
-function createDestinationTemplate (destination) {
-  const { description, pictures } = destination || {};
-
+function createDestinationTemplate (filterDestinationById) {
+  const { description, pictures } = filterDestinationById || { description: '', pictures: [] };
   if (description.length > 0 || pictures.length > 0) {
     return (`
       <section class="event__section  event__section--destination">
@@ -83,6 +83,26 @@ function createDestinationTemplate (destination) {
   }
 
   return '';
+}
+
+function createRollupButton (id) {
+  if (id === 0) {
+    return '';
+  }
+
+  return (`
+    <button class="event__rollup-btn" type="button">
+      <span class="visually-hidden">Open event</span>
+    </button>
+  `);
+}
+
+function createCancelOrDeleteButton (id) {
+  if (id === 0) {
+    return 'Cancel';
+  }
+
+  return 'Delete';
 }
 
 function createWaypointEditTemplate (waypoints, offers, destinations) {
@@ -138,10 +158,10 @@ function createWaypointEditTemplate (waypoints, offers, destinations) {
             </div>
 
             <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-            <button class="event__reset-btn" type="reset">Delete</button>
-            <button class="event__rollup-btn" type="button">
-              <span class="visually-hidden">Open event</span>
+            <button class="event__reset-btn" type="reset">
+              ${createCancelOrDeleteButton(id)}
             </button>
+            ${createRollupButton(id)}
           </header>
           <section class="event__details">
             ${createOffersListTemplate(filterOfferByType, checkedOffers)}
@@ -164,7 +184,7 @@ export default class WaypointEditView extends AbstractStatefulView {
   #datepickerFrom = null;
   #datepickerTo = null;
 
-  constructor({ waypoint, offers, destinations, onFormSubmit, onCloseEditClick, onResetClick }) {
+  constructor({ waypoint = DEFAULT_WAYPOINT, offers, destinations, onFormSubmit, onCloseEditClick, onResetClick }) {
     super();
 
     this._setState(WaypointEditView.parceWaypointToState(waypoint));
@@ -180,17 +200,12 @@ export default class WaypointEditView extends AbstractStatefulView {
 
   _restoreHandlers() {
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#closeEditClickHandler);
+    this.element.querySelector('.event__rollup-btn')?.addEventListener('click', this.#closeEditClickHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationInputHandler);
     this.element.querySelector('.event__available-offers')?.addEventListener('change',this.#changeOffersCheckedHandler);
-
-    const resetButton = this.element.querySelector('.event__reset-btn');
-    if (resetButton.textContent.toLowerCase() === TypeButtonReset.DELETE) {
-      resetButton.addEventListener('click', this.#formResetHandler);
-    } else {
-      resetButton.addEventListener('click', this.#closeEditClick);
-    }
+    this.element.querySelector('.event__field-group--price').addEventListener('input', this.#changePriceHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formResetHandler);
 
     this.#setDatePicker();
   }
@@ -221,12 +236,12 @@ export default class WaypointEditView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit(WaypointEditView.parceWaypointToState(this._state));
+    this.#handleFormSubmit(WaypointEditView.parceStateToWaypoint(this._state));
   };
 
   #formResetHandler = (evt) => {
     evt.preventDefault();
-    this.#handleResetClick(this._state);
+    this.#handleResetClick(WaypointEditView.parceStateToWaypoint(this._state));
   };
 
   #closeEditClickHandler = (evt) => {
@@ -251,6 +266,14 @@ export default class WaypointEditView extends AbstractStatefulView {
   #changeOffersCheckedHandler = () => {
     this._setState({
       offers: Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked')).map((item) => item.id),
+    });
+  };
+
+  #changePriceHandler = (evt) => {
+    evt.preventDefault();
+
+    this._setState({
+      basePrice: Number(evt.target.value)
     });
   };
 

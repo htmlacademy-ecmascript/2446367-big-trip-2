@@ -30,10 +30,10 @@ function getDifferenceInTime(start, end) {
   }
 }
 
-const isWaypointFuture = (date) => date && dayjs().isAfter(date);
-const isWaypointPast = (date) => date && dayjs().isBefore(date);
-const isWaypointPastAndFuture = (dateFrom, dateTo) => dayjs().isSameOrBefore(dateFrom) && dayjs().isSameOrAfter(dateTo);
-const sortByTime = (a, b) => dayjs(b.dateTo).diff(b.dateFrom) - dayjs(a.dateTo).diff(a.dateFrom);
+const isWaypointFuture = (date) => date && dayjs(date).isAfter(dayjs().format());
+const isWaypointPast = (date) => date && dayjs().isBefore(dayjs().format());
+const isWaypointPastAndFuture = (dateFrom, dateTo) => dayjs(dateFrom).isSameOrBefore(dayjs().format()) && dayjs(dateTo).isSameOrAfter(dayjs().format());
+const sortByTime = (a, b) => dayjs(a.dateFrom).diff(a.dateTo) - dayjs(b.dateFrom).diff(b.dateTo);
 const sortByPrice = (a, b) => b.basePrice - a.basePrice;
 
 

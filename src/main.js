@@ -19,9 +19,22 @@ const headerPresenter = new HeaderPresenter({
 
 const boardPresenter = new BoardPresenter({
   boardContainer: tripEventsElement,
+  onNewWaypointDestroy: handleAddWaypointFormClose,
   waypointModel,
   filterModel,
 });
+
+const addWaypointButton = document.querySelector('.trip-main__event-add-btn');
+addWaypointButton.addEventListener('click', handleAddWaypointButtonClick);
+
+function handleAddWaypointFormClose() {
+  addWaypointButton.disabled = false;
+}
+
+function handleAddWaypointButtonClick() {
+  boardPresenter.createWaypoint();
+  addWaypointButton.disabled = true;
+}
 
 headerPresenter.init();
 boardPresenter.init();
