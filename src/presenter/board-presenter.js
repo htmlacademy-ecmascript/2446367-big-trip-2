@@ -1,15 +1,18 @@
-import { remove, render } from '../framework/render.js';
-import { sortByTime, sortByPrice } from '../utils/waypoints.js';
 import WaypointListView from '../view/waypoint-list-view.js';
 import ListSortView from '../view/list-sort-view.js';
 import NoWaypointView from '../view/no-waypoint-view.js';
 import WaypointPresenter from './waypoint-presenter.js';
-import { SortType, UpdateType, UserAction } from '../data.js';
+import { remove, render } from '../framework/render.js';
+import { FilterType, SortType, UpdateType, UserAction } from '../data.js';
+import { filter } from '../utils/filter.js';
+import { sortByTime, sortByPrice } from '../utils/waypoints.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
-  #waypointModel = null;
   #sortComponent = null;
+
+  #waypointModel = null;
+  #filterModel = null;
 
   #waypointListComponent = new WaypointListView();
   #noWaypointComponent = new NoWaypointView();
@@ -20,23 +23,30 @@ export default class BoardPresenter {
   #waypointPresenters = new Map();
 
   #currentSortType = SortType.DAY;
+  #filterType = FilterType.EVERYTHING;
 
-  constructor({ boardContainer, waypointModel }) {
+  constructor({ boardContainer, waypointModel, filterModel }) {
     this.#boardContainer = boardContainer;
     this.#waypointModel = waypointModel;
+    this.#filterModel = filterModel;
 
     this.#waypointModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   get waypoints() {
+    this.#filterType = this.#filterModel.filter;
+    const waypoints = this.#waypointModel.waypoints;
+    const filterWaypoint = filter[this.#filterType](waypoints);
+
     switch(this.#currentSortType) {
       case SortType.TIME:
-        return [...this.#waypointModel.waypoints].sort(sortByTime);
+        return filterWaypoint.sort(sortByTime);
       case SortType.PRICE:
-        return [...this.#waypointModel.waypoints].sort(sortByPrice);
+        return filterWaypoint.sort(sortByPrice);
     }
 
-    return this.#waypointModel.waypoints;
+    return filterWaypoint;
   }
 
   init() {
