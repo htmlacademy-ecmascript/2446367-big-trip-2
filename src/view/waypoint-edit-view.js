@@ -5,6 +5,7 @@ import { humanizeDate } from '../utils/waypoints.js';
 import { DEFAULT_WAYPOINT } from '../data.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import he from 'he';
 
 function createTypeTemplate (type, checkedType, id) {
   const isChecked = checkedType === type ? 'checked' : false;
@@ -135,7 +136,7 @@ function createWaypointEditTemplate (waypoints, offers, destinations) {
               <label class="event__label  event__type-output" for="event-destination-${id}">
                 ${type}
               </label>
-              <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${name}" list="destination-list-${id}">
+              <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${he.encode(name)}" list="destination-list-${id}">
               <datalist id="destination-list-${id}">
                   ${destinations.map((destination) => `<option value=${destination.name}></option>`).join('')}
               </datalist>
