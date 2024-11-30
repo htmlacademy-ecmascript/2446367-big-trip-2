@@ -2,8 +2,10 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { WAYPOINT_TYPE, DateFormat } from '../data.js';
 import { getElementById, getElementByType, capitalizeFirstLetter } from '../utils/common.js';
 import { humanizeDate } from '../utils/waypoints.js';
+import { DEFAULT_WAYPOINT } from '../data.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import he from 'he';
 
 function createTypeTemplate (type, checkedType, id) {
   const isChecked = checkedType === type ? 'checked' : false;
@@ -68,9 +70,8 @@ function createPhotoContainerTemplate (pictures) {
   return '';
 }
 
-function createDestinationTemplate (destination) {
-  const { description, pictures } = destination || {};
-
+function createDestinationTemplate (filterDestinationById) {
+  const { description, pictures } = filterDestinationById || { description: '', pictures: [] };
   if (description.length > 0 || pictures.length > 0) {
     return (`
       <section class="event__section  event__section--destination">
@@ -85,11 +86,31 @@ function createDestinationTemplate (destination) {
   return '';
 }
 
+function createRollupButton (id) {
+  if (id === 0) {
+    return '';
+  }
+
+  return (`
+    <button class="event__rollup-btn" type="button">
+      <span class="visually-hidden">Open event</span>
+    </button>
+  `);
+}
+
+function createCancelOrDeleteButton (id) {
+  if (id === 0) {
+    return 'Cancel';
+  }
+
+  return 'Delete';
+}
+
 function createWaypointEditTemplate (waypoints, offers, destinations) {
   const { id, type, dateFrom, dateTo, basePrice, offers: checkedOffers, destination: waypointDestination } = waypoints;
   const filterOfferByType = getElementByType(offers, type);
   const filterDestinationById = getElementById(destinations, waypointDestination);
-  const { name } = filterDestinationById;
+  const { name } = filterDestinationById || { name: '' };
 
   return (`
     <li class="trip-events__item">
@@ -115,7 +136,7 @@ function createWaypointEditTemplate (waypoints, offers, destinations) {
               <label class="event__label  event__type-output" for="event-destination-${id}">
                 ${type}
               </label>
-              <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${name}" list="destination-list-${id}">
+              <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${he.encode(name)}" list="destination-list-${id}">
               <datalist id="destination-list-${id}">
                   ${destinations.map((destination) => `<option value=${destination.name}></option>`).join('')}
               </datalist>
@@ -138,10 +159,10 @@ function createWaypointEditTemplate (waypoints, offers, destinations) {
             </div>
 
             <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-            <button class="event__reset-btn" type="reset">Delete</button>
-            <button class="event__rollup-btn" type="button">
-              <span class="visually-hidden">Open event</span>
+            <button class="event__reset-btn" type="reset">
+              ${createCancelOrDeleteButton(id)}
             </button>
+            ${createRollupButton(id)}
           </header>
           <section class="event__details">
             ${createOffersListTemplate(filterOfferByType, checkedOffers)}
@@ -159,11 +180,12 @@ export default class WaypointEditView extends AbstractStatefulView {
 
   #handleFormSubmit = null;
   #closeEditClick = null;
+  #handleResetClick = null;
 
   #datepickerFrom = null;
   #datepickerTo = null;
 
-  constructor({ waypoint, offers, destinations, onFormSubmit, onCloseEditClick }) {
+  constructor({ waypoint = DEFAULT_WAYPOINT, offers, destinations, onFormSubmit, onCloseEditClick, onResetClick }) {
     super();
 
     this._setState(WaypointEditView.parceWaypointToState(waypoint));
@@ -172,23 +194,55 @@ export default class WaypointEditView extends AbstractStatefulView {
 
     this.#handleFormSubmit = onFormSubmit;
     this.#closeEditClick = onCloseEditClick;
+    this.#handleResetClick = onResetClick;
 
     this._restoreHandlers();
   }
 
   _restoreHandlers() {
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#closeEditClickHandler);
+    this.element.querySelector('.event__rollup-btn')?.addEventListener('click', this.#closeEditClickHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#changeTypeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationInputHandler);
     this.element.querySelector('.event__available-offers')?.addEventListener('change',this.#changeOffersCheckedHandler);
+    this.element.querySelector('.event__field-group--price').addEventListener('input', this.#changePriceHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formResetHandler);
 
     this.#setDatePicker();
   }
 
+  get template() {
+    return createWaypointEditTemplate(this._state, this.#offers, this.#destinations);
+  }
+
+  reset (waypoint) {
+    this.updateElement(
+      WaypointEditView.parceWaypointToState(waypoint),
+    );
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if(this.#datepickerFrom) {
+      this.#datepickerFrom.destroy();
+      this.#datepickerFrom = null;
+    }
+
+    if(this.#datepickerTo) {
+      this.#datepickerTo.destroy();
+      this.#datepickerTo = null;
+    }
+  }
+
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit(WaypointEditView.parceWaypointToState(this._state));
+    this.#handleFormSubmit(WaypointEditView.parceStateToWaypoint(this._state));
+  };
+
+  #formResetHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleResetClick(WaypointEditView.parceStateToWaypoint(this._state));
   };
 
   #closeEditClickHandler = (evt) => {
@@ -213,6 +267,14 @@ export default class WaypointEditView extends AbstractStatefulView {
   #changeOffersCheckedHandler = () => {
     this._setState({
       offers: Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked')).map((item) => item.id),
+    });
+  };
+
+  #changePriceHandler = (evt) => {
+    evt.preventDefault();
+
+    this._setState({
+      basePrice: Number(evt.target.value)
     });
   };
 
@@ -264,29 +326,5 @@ export default class WaypointEditView extends AbstractStatefulView {
 
   static parceStateToWaypoint(waypoint) {
     return {...waypoint};
-  }
-
-  get template() {
-    return createWaypointEditTemplate(this._state, this.#offers, this.#destinations);
-  }
-
-  reset (waypoint) {
-    this.updateElement(
-      WaypointEditView.parceWaypointToState(waypoint),
-    );
-  }
-
-  removeElement() {
-    super.removeElement();
-
-    if(this.#datepickerFrom) {
-      this.#datepickerFrom.destroy();
-      this.#datepickerFrom = null;
-    }
-
-    if(this.#datepickerTo) {
-      this.#datepickerTo.destroy();
-      this.#datepickerTo = null;
-    }
   }
 }

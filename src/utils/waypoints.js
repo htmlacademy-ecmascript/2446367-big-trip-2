@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import duration from 'dayjs/plugin/duration';
 import {
   DateFormat,
   MILLISECONDS_IN_HOUR,
@@ -9,31 +10,31 @@ import {
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
+dayjs.extend(duration);
 
 function humanizeDate(date, format) {
   return date ? dayjs(date).format(format) : '';
 }
 
 function getDifferenceInTime(start, end) {
-  const difference = dayjs(end).diff(start);
+  const difference = dayjs(end).diff(dayjs(start));
 
-  if (difference < MILLISECONDS_IN_HOUR) {
-    return dayjs(difference).format(DateFormat.MINUTES_WITH_POSTFIX);
-  }
+  switch (true) {
+    case difference < MILLISECONDS_IN_HOUR:
+      return dayjs.duration(difference).format(DateFormat.MINUTES_WITH_POSTFIX);
 
-  if (difference > MILLISECONDS_IN_HOUR && difference < MILLISECONDS_IN_DAY) {
-    return dayjs(difference).format(DateFormat.HOUR_MINUTES_WITH_POSTFIX);
-  }
+    case difference >= MILLISECONDS_IN_HOUR && difference < MILLISECONDS_IN_DAY:
+      return dayjs.duration(difference).format(DateFormat.HOUR_MINUTES_WITH_POSTFIX);
 
-  if (difference > MILLISECONDS_IN_DAY) {
-    return dayjs(difference).format(DateFormat.DAY_HOUR_MINUTES_WITH_POSTFIX);
+    case difference >= MILLISECONDS_IN_DAY:
+      return dayjs.duration(difference).format(DateFormat.DAY_HOUR_MINUTES_WITH_POSTFIX);
   }
 }
 
-const isWaypointFuture = (date) => date && dayjs().isAfter(date);
-const isWaypointPast = (date) => date && dayjs().isBefore(date);
-const isWaypointPastAndFuture = (dateFrom, dateTo) => dayjs().isSameOrBefore(dateFrom) && dayjs().isSameOrAfter(dateTo);
-const sortByTime = (a, b) => dayjs(b.dateTo).diff(b.dateFrom) - dayjs(a.dateTo).diff(a.dateFrom);
+const isWaypointFuture = (date) => date && dayjs(date).isAfter(dayjs().format());
+const isWaypointPast = (date) => date && dayjs().isBefore(dayjs().format());
+const isWaypointPastAndFuture = (dateFrom, dateTo) => dayjs(dateFrom).isSameOrBefore(dayjs().format()) && dayjs(dateTo).isSameOrAfter(dayjs().format());
+const sortByTime = (a, b) => dayjs(a.dateFrom).diff(a.dateTo) - dayjs(b.dateFrom).diff(b.dateTo);
 const sortByPrice = (a, b) => b.basePrice - a.basePrice;
 
 

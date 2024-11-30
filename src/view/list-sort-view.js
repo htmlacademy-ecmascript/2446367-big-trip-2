@@ -2,17 +2,17 @@ import { SortType } from '../data.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 // создание шаблона списка элементов сортировки
-function createSorListTemplate() {
+function createSorListTemplate(currentSortType) {
   return (`
     <form class="trip-events__trip-sort  trip-sort" action="#" method="get">
-      ${Object.values(SortType).map((item) => createSortItemTemplate(item)).join('')}
+      ${Object.values(SortType).map((item) => createSortItemTemplate(item, currentSortType)).join('')}
     </form>
   `);
 }
 
 // создание шаблона элемента сортировки
-function createSortItemTemplate(type) {
-  const isChecked = SortType.DAY === type ? 'checked' : '';
+function createSortItemTemplate(type, currentSortType) {
+  const isChecked = currentSortType === type ? 'checked' : '';
   const isDisabled = type === SortType.EVENT || type === SortType.OFFERS ? 'disabled' : '';
 
   return (`
@@ -24,17 +24,19 @@ function createSortItemTemplate(type) {
 }
 
 export default class ListSortView extends AbstractView {
+  #currentSortType = null;
   #handleSortTypeChange = null;
 
-  constructor({ onSortTypeChange }) {
+  constructor({ currentSortType, onSortTypeChange }) {
     super();
 
+    this.#currentSortType = currentSortType;
     this.#handleSortTypeChange = onSortTypeChange;
     this.element.addEventListener('change', this.#sortTypeChangeHandler);
   }
 
   get template() {
-    return createSorListTemplate();
+    return createSorListTemplate(this.#currentSortType);
   }
 
   #sortTypeChangeHandler = (evt) => {
