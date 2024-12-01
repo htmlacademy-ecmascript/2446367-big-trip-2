@@ -20,12 +20,12 @@ function createTypeTemplate (type, checkedType, id) {
 
 function createOfferTemplate (offer, checkedOffers) {
   const { id, title, price } = offer;
-  const isChecked = checkedOffers.includes(id) ? 'checked' : '';
+  const isChecked = checkedOffers.includes(id) ? 'checked' : false;
 
   return (`
     <div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="${id}" type="checkbox" name="${id}" ${isChecked}>
-      <label class="event__offer-label" for="${id}">
+      <input class="event__offer-checkbox  visually-hidden" id="${id}" type="checkbox" name=${id} ${isChecked}>
+      <label class="event__offer-label" for=${id}>
         <span class="event__offer-title">${title}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${price}</span>
@@ -34,7 +34,7 @@ function createOfferTemplate (offer, checkedOffers) {
   `);
 }
 
-function createOffersListTemplate ({offers}, checkedOffers) {
+function createOffersListTemplate (offers, checkedOffers) {
   if (offers.length !== 0) {
     return (`
       <section class="event__section  event__section--offers">
@@ -70,8 +70,7 @@ function createPhotoContainerTemplate (pictures) {
   return '';
 }
 
-function createDestinationTemplate (filterDestinationById) {
-  const { description, pictures } = filterDestinationById || { description: '', pictures: [] };
+function createDestinationTemplate (description, pictures) {
   if (description.length > 0 || pictures.length > 0) {
     return (`
       <section class="event__section  event__section--destination">
@@ -79,6 +78,21 @@ function createDestinationTemplate (filterDestinationById) {
         <p class="event__destination-description">${description}</p>
 
         ${createPhotoContainerTemplate(pictures)}
+      </section>
+    `);
+  }
+
+  return '';
+}
+
+function createDetailsTemplate ({ offers }, checkedOffers, filterDestinationById) {
+  const { description, pictures } = filterDestinationById || { description: '', pictures: [] };
+
+  if (offers.length > 0 || description.length > 0 || pictures.length > 0) {
+    return (`
+      <section class="event__details">
+            ${createOffersListTemplate(offers, checkedOffers)}
+            ${createDestinationTemplate(description, pictures)}
       </section>
     `);
   }
@@ -164,17 +178,13 @@ function createWaypointEditTemplate (waypoints, offers, destinations) {
             </button>
             ${createRollupButton(id)}
           </header>
-          <section class="event__details">
-            ${createOffersListTemplate(filterOfferByType, checkedOffers)}
-            ${createDestinationTemplate(filterDestinationById)}
-          </section>
+          ${createDetailsTemplate(filterOfferByType, checkedOffers, filterDestinationById)}
         </form>
       </li>
   `);
 }
 
 export default class WaypointEditView extends AbstractStatefulView {
-  #waypoint = null;
   #offers = null;
   #destinations = null;
 
@@ -217,7 +227,7 @@ export default class WaypointEditView extends AbstractStatefulView {
 
   reset (waypoint) {
     this.updateElement(
-      WaypointEditView.parceWaypointToState(waypoint),
+      WaypointEditView.parceWaypointToState(waypoint)
     );
   }
 

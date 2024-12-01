@@ -7,6 +7,7 @@ import { FilterType, SortType, UpdateType, UserAction } from '../data.js';
 import { filter } from '../utils/filter.js';
 import { sortByTime, sortByPrice } from '../utils/waypoints.js';
 import NewWaypointPresenter from './new-waypoint-presenter.js';
+import LoadingView from '../view/loading-view.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
@@ -19,6 +20,7 @@ export default class BoardPresenter {
 
   #waypointListComponent = new WaypointListView();
   #noWaypointComponent = new NoWaypointView();
+  #loadingComponent = new LoadingView();
 
   #boardOffers = [];
   #boardDestinations = [];
@@ -27,6 +29,7 @@ export default class BoardPresenter {
 
   #currentSortType = SortType.DAY;
   #filterType = FilterType.EVERYTHING;
+  #isLoading = true;
 
   constructor({ boardContainer, waypointModel, filterModel, onNewWaypointDestroy }) {
     this.#boardContainer = boardContainer;
@@ -60,8 +63,8 @@ export default class BoardPresenter {
   }
 
   init() {
-    this.#boardOffers = [...this.#waypointModel.offers];
-    this.#boardDestinations = [...this.#waypointModel.destinations];
+    // this.#boardOffers = [...this.#waypointModel.offers];
+    // this.#boardDestinations = [...this.#waypointModel.destinations];
 
     this.#renderBoard();
   }
@@ -84,6 +87,11 @@ export default class BoardPresenter {
   }
 
   #renderBoard() {
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+
     if (this.waypoints.length === 0) {
       this.#renderNoWaypoint();
       return;
@@ -95,8 +103,8 @@ export default class BoardPresenter {
 
     this.waypoints.map((waypoint) => this.#renderWaypointItem({
       waypoint: waypoint,
-      offers: this.#boardOffers,
-      destinations: this.#boardDestinations,
+      offers: this.#waypointModel.offers,
+      destinations: this.#waypointModel.destinations,
     }));
   }
 
@@ -117,7 +125,7 @@ export default class BoardPresenter {
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        this.#waypointPresenters.get(data.id).init(data, this.#boardOffers, this.#boardDestinations);
+        this.#waypointPresenters.get(data.id).init(data, this.#waypointModel.offers, this.#waypointModel.destinations);
         break;
       case UpdateType.MINOR:
         this.#clearBoard();
@@ -125,6 +133,11 @@ export default class BoardPresenter {
         break;
       case UpdateType.MAJOR:
         this.#clearBoard({ resetSortType: true });
+        this.#renderBoard();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
         this.#renderBoard();
         break;
     }
@@ -148,6 +161,7 @@ export default class BoardPresenter {
 
     remove(this.#sortComponent);
     remove(this.#noWaypointComponent);
+    remove(this.#loadingComponent);
 
     if (resetSortType) {
       this.#currentSortType = SortType.DAY;
@@ -165,5 +179,9 @@ export default class BoardPresenter {
 
   #renderNoWaypoint() {
     render(this.#noWaypointComponent, this.#boardContainer);
+  }
+
+  #renderLoading() {
+    render(this.#loadingComponent, this.#boardContainer);
   }
 }

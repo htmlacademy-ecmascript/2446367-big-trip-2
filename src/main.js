@@ -2,12 +2,18 @@ import HeaderPresenter from './presenter/header-presenter.js';
 import BoardPresenter from './presenter/board-presenter.js';
 import WaypointsModel from './model/waypoints-model.js';
 import FilterModel from './model/filter-model.js';
+import WaypointApiService from './waypoint-api-service.js';
 
 const tripInfoContainer = document.querySelector('.trip-main');
 const filtersContainer = document.querySelector('.trip-controls__filters');
 const tripEventsElement = document.querySelector('.trip-events');
 
-const waypointModel = new WaypointsModel();
+const AUTHORIZATION = 'Basic 3423flfkldsoel';
+const SERVER_URL = 'https://22.objects.htmlacademy.pro/big-trip';
+
+const waypointModel = new WaypointsModel({
+  waypointApiService: new WaypointApiService(SERVER_URL, AUTHORIZATION)
+});
 const filterModel = new FilterModel();
 
 const headerPresenter = new HeaderPresenter({
@@ -37,4 +43,7 @@ function handleAddWaypointButtonClick() {
 }
 
 headerPresenter.init();
+waypointModel.init()
+  .finally(() => {
+  });
 boardPresenter.init();
